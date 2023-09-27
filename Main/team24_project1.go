@@ -36,7 +36,10 @@ func main() {
 
 	fmt.Println(fileLines)
 
-	readFile.Close()
+	err = readFile.Close()
+	if err != nil {
+		return
+	}
 }
 
 func WriteOutput() {
@@ -45,7 +48,12 @@ func WriteOutput() {
 		fmt.Println("Failed to create file:", errs)
 		return
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
 
 	_, errs = file.WriteString("Hello, world")
 	if errs != nil {
