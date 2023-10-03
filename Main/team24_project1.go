@@ -86,7 +86,7 @@ func CreateString(instructionCode string) string {
 			decimalNum *= -1
 			fmt.Println(decimalNum)
 		}
-		return opcode + " " + number + " B\t#" + strconv.FormatInt(decimalNum, 10)
+		return opcode + " " + number + " B\t#" + strconv.FormatInt(decimalNum, 10) + "\n"
 	}
 
 	if strings.Index(opcode, "10001010000") == 0 { //AND instruction
@@ -157,5 +157,5 @@ func CreateString(instructionCode string) string {
 
 	}
 
-	return ""
+	return "\n"
 }
