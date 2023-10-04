@@ -11,6 +11,7 @@ import (
 
 var InputFileName *string
 var OutputFileName *string
+var ProgramCounter int = 0
 
 func main() {
 
@@ -64,6 +65,7 @@ func WriteOutput(fileLine []string) {
 			fmt.Println("Failed to write to file:", errs)
 			return
 		}
+		ProgramCounter += 4
 	}
 
 	fmt.Println("Wrote to file: ", *OutputFileName)
@@ -86,7 +88,9 @@ func CreateString(instructionCode string) string {
 			decimalNum *= -1
 			fmt.Println(decimalNum)
 		}
-		return opcode + " " + number + " B\t#" + strconv.FormatInt(decimalNum, 10) + "\n"
+		formattedString := fmt.Sprintf("%-38s", opcode+" "+number)
+		//38 characters
+		return formattedString + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + "B   #" + strconv.FormatInt(decimalNum, 10) + "\n"
 	}
 
 	if strings.Index(opcode, "10001010000") == 0 { //AND instruction
