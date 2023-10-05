@@ -126,7 +126,29 @@ func CreateString(instructionCode string) string {
 	}
 
 	if strings.Index(opcode, "1001000100") == 0 { //ADDI instruction
+		opcode = instructionCode[0:10]
+		immediate := instructionCode[10:22]
+		rnNum := instructionCode[22:27]
+		rdNum := instructionCode[27:32]
 
+		rn, _ := strconv.ParseInt(rnNum, 2, 5)
+		rd, _ := strconv.ParseInt(rdNum, 2, 5)
+
+		var decimalNum int64
+		if immediate[0] == '0' {
+			decimalNum, _ = strconv.ParseInt(immediate, 2, 14)
+		} else {
+			decimalNum, _ = strconv.ParseInt("1000000000000", 2, 14)
+			temp, _ := strconv.ParseInt(immediate, 2, 14)
+			decimalNum -= temp
+			decimalNum *= -1
+		}
+
+		formattedString := fmt.Sprintf("%-36s", opcode+" "+immediate+" "+rnNum+" "+rdNum)
+		formattedRegisterString := fmt.Sprintf("R%d, R%d", rd, rn)
+
+		return formattedString + "\t" + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + "ADDI " +
+			formattedRegisterString + ", #" + strconv.FormatInt(decimalNum, 10) + "\n"
 	}
 
 	if strings.Index(opcode, "10101010000") == 0 { //ORR instruction
@@ -170,7 +192,29 @@ func CreateString(instructionCode string) string {
 	}
 
 	if strings.Index(opcode, "1101000100") == 0 { //SUBI instruction
+		opcode = instructionCode[0:10]
+		immediate := instructionCode[10:22]
+		rnNum := instructionCode[22:27]
+		rdNum := instructionCode[27:32]
 
+		rn, _ := strconv.ParseInt(rnNum, 2, 5)
+		rd, _ := strconv.ParseInt(rdNum, 2, 5)
+
+		var decimalNum int64
+		if immediate[0] == '0' {
+			decimalNum, _ = strconv.ParseInt(immediate, 2, 14)
+		} else {
+			decimalNum, _ = strconv.ParseInt("1000000000000", 2, 14)
+			temp, _ := strconv.ParseInt(immediate, 2, 14)
+			decimalNum -= temp
+			decimalNum *= -1
+		}
+
+		formattedString := fmt.Sprintf("%-36s", opcode+" "+immediate+" "+rnNum+" "+rdNum)
+		formattedRegisterString := fmt.Sprintf("R%d, R%d", rd, rn)
+
+		return formattedString + "\t" + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + "SUBI " +
+			formattedRegisterString + ", #" + strconv.FormatInt(decimalNum, 10) + "\n"
 	}
 
 	if strings.Index(opcode, "110100101") == 0 { //MOVZ instruction
