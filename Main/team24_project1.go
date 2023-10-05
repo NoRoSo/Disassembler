@@ -11,6 +11,7 @@ import (
 
 var InputFileName *string
 var OutputFileName *string
+var ProgramCounter int = 0
 
 func main() {
 
@@ -64,6 +65,7 @@ func WriteOutput(fileLine []string) {
 			fmt.Println("Failed to write to file:", errs)
 			return
 		}
+		ProgramCounter += 4
 	}
 
 	fmt.Println("Wrote to file: ", *OutputFileName)
@@ -86,25 +88,41 @@ func CreateString(instructionCode string) string {
 			decimalNum *= -1
 			fmt.Println(decimalNum)
 		}
-		return opcode + " " + number + " B\t#" + strconv.FormatInt(decimalNum, 10) + "\n"
+		formattedString := fmt.Sprintf("%-38s", opcode+" "+number)
+		//38 characters
+		return formattedString + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + "B   #" + strconv.FormatInt(decimalNum, 10) + "\n"
 	}
 
 	if strings.Index(opcode, "10001010000") == 0 { //AND instruction
-		r2 := instructionCode[11:16]
+		rmNum := instructionCode[11:16]
 		shamt := instructionCode[16:22]
-		r1 := instructionCode[22:27]
-		r3 := instructionCode[27:32]
+		rnNum := instructionCode[22:27]
+		rdNum := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tAND R3, R1, R2\n"
+		rm, _ := strconv.ParseInt(rmNum, 2, 5)
+		rn, _ := strconv.ParseInt(rnNum, 2, 5)
+		rd, _ := strconv.ParseInt(rdNum, 2, 5)
+
+		formattedString := fmt.Sprintf("%-36s", opcode+" "+rmNum+" "+shamt+" "+rnNum+" "+rdNum)
+		formattedRegisterString := fmt.Sprintf("R%d, R%d, R%d", rd, rn, rm)
+
+		return formattedString + "\t" + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + "AND " + formattedRegisterString + "\n"
 	}
 
 	if strings.Index(opcode, "10001011000") == 0 { //ADD instruction
-		r2 := instructionCode[11:16]
+		rmNum := instructionCode[11:16]
 		shamt := instructionCode[16:22]
-		r1 := instructionCode[22:27]
-		r3 := instructionCode[27:32]
+		rnNum := instructionCode[22:27]
+		rdNum := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tADD R3, R1, R2\n"
+		rm, _ := strconv.ParseInt(rmNum, 2, 5)
+		rn, _ := strconv.ParseInt(rnNum, 2, 5)
+		rd, _ := strconv.ParseInt(rdNum, 2, 5)
+
+		formattedString := fmt.Sprintf("%-36s", opcode+" "+rmNum+" "+shamt+" "+rnNum+" "+rdNum)
+		formattedRegisterString := fmt.Sprintf("R%d, R%d, R%d", rd, rn, rm)
+
+		return formattedString + "\t" + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + "ADD " + formattedRegisterString + "\n"
 	}
 
 	if strings.Index(opcode, "1001000100") == 0 { //ADDI instruction
@@ -112,12 +130,19 @@ func CreateString(instructionCode string) string {
 	}
 
 	if strings.Index(opcode, "10101010000") == 0 { //ORR instruction
-		r2 := instructionCode[11:16]
+		rmNum := instructionCode[11:16]
 		shamt := instructionCode[16:22]
-		r1 := instructionCode[22:27]
-		r3 := instructionCode[27:32]
+		rnNum := instructionCode[22:27]
+		rdNum := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tORR R3, R1, R2\n"
+		rm, _ := strconv.ParseInt(rmNum, 2, 5)
+		rn, _ := strconv.ParseInt(rnNum, 2, 5)
+		rd, _ := strconv.ParseInt(rdNum, 2, 5)
+
+		formattedString := fmt.Sprintf("%-36s", opcode+" "+rmNum+" "+shamt+" "+rnNum+" "+rdNum)
+		formattedRegisterString := fmt.Sprintf("R%d, R%d, R%d", rd, rn, rm)
+
+		return formattedString + "\t" + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + "ORR " + formattedRegisterString + "\n"
 	}
 
 	if strings.Index(opcode, "10110100") == 0 { //CBZ instruction
@@ -129,12 +154,19 @@ func CreateString(instructionCode string) string {
 	}
 
 	if strings.Index(opcode, "11001011000") == 0 { //SUB instruction
-		r2 := instructionCode[11:16]
+		rmNum := instructionCode[11:16]
 		shamt := instructionCode[16:22]
-		r1 := instructionCode[22:27]
-		r3 := instructionCode[27:32]
+		rnNum := instructionCode[22:27]
+		rdNum := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tSUB R3, R1, R2\n"
+		rm, _ := strconv.ParseInt(rmNum, 2, 5)
+		rn, _ := strconv.ParseInt(rnNum, 2, 5)
+		rd, _ := strconv.ParseInt(rdNum, 2, 5)
+
+		formattedString := fmt.Sprintf("%-36s", opcode+" "+rmNum+" "+shamt+" "+rnNum+" "+rdNum)
+		formattedRegisterString := fmt.Sprintf("R%d, R%d, R%d", rd, rn, rm)
+
+		return formattedString + "\t" + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + "SUB " + formattedRegisterString + "\n"
 	}
 
 	if strings.Index(opcode, "1101000100") == 0 { //SUBI instruction
@@ -174,12 +206,19 @@ func CreateString(instructionCode string) string {
 	}
 
 	if strings.Index(opcode, "11101010000") == 0 { //EOR instruction
-		r2 := instructionCode[11:16]
+		rmNum := instructionCode[11:16]
 		shamt := instructionCode[16:22]
-		r1 := instructionCode[22:27]
-		r3 := instructionCode[27:32]
+		rnNum := instructionCode[22:27]
+		rdNum := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tEOR R3, R1, R2\n"
+		rm, _ := strconv.ParseInt(rmNum, 2, 5)
+		rn, _ := strconv.ParseInt(rnNum, 2, 5)
+		rd, _ := strconv.ParseInt(rdNum, 2, 5)
+
+		formattedString := fmt.Sprintf("%-36s", opcode+" "+rmNum+" "+shamt+" "+rnNum+" "+rdNum)
+		formattedRegisterString := fmt.Sprintf("R%d, R%d, R%d", rd, rn, rm)
+
+		return formattedString + "\t" + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + "EOR " + formattedRegisterString + "\n"
 	}
 
 	return "\n"
