@@ -95,7 +95,7 @@ func CreateString(instructionCode string) string {
 		r1 := instructionCode[22:27]
 		r3 := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tAND R3, R1, R2"
+		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tAND R3, R1, R2\n"
 	}
 
 	if strings.Index(opcode, "10001011000") == 0 { //ADD instruction
@@ -104,7 +104,7 @@ func CreateString(instructionCode string) string {
 		r1 := instructionCode[22:27]
 		r3 := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tADD R3, R1, R2"
+		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tADD R3, R1, R2\n"
 	}
 
 	if strings.Index(opcode, "1001000100") == 0 { //ADDI instruction
@@ -117,7 +117,7 @@ func CreateString(instructionCode string) string {
 		r1 := instructionCode[22:27]
 		r3 := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tORR R3, R1, R2"
+		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tORR R3, R1, R2\n"
 	}
 
 	if strings.Index(opcode, "10110100") == 0 { //CBZ instruction
@@ -134,7 +134,7 @@ func CreateString(instructionCode string) string {
 		r1 := instructionCode[22:27]
 		r3 := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tSUB R3, R1, R2"
+		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tSUB R3, R1, R2\n"
 	}
 
 	if strings.Index(opcode, "1101000100") == 0 { //SUBI instruction
@@ -179,7 +179,7 @@ func CreateString(instructionCode string) string {
 		r1 := instructionCode[22:27]
 		r3 := instructionCode[27:32]
 
-		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tEOR R3, R1, R2"
+		return opcode + " " + r2 + " " + shamt + " " + r1 + " " + r3 + "\tEOR R3, R1, R2\n"
 	}
 
 	return "\n"
