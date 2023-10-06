@@ -315,7 +315,7 @@ func CreateString(instructionCode string) string {
 		return formattedString + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + " EOR " + formattedRegisterString + "\n"
 	}
 
-	if strings.Index(opcode, "11111110110") == 0 { //BREAK instruction
+	if strings.Index(opcode, "11111110110") == 0 { //BREAK instruction.
 		return fmt.Sprintf("%-38s", "11111110 110 11110 11111 11111 100111") + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) +
 			" BREAK" + "\n"
 	}
