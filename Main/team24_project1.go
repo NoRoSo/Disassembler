@@ -12,6 +12,7 @@ import (
 var InputFileName *string
 var OutputFileName *string
 var ProgramCounter int = 96
+var hasBreak bool = false
 
 func main() {
 
@@ -175,7 +176,7 @@ func CreateString(instructionCode string) string {
 
 		formattedRegisterString := fmt.Sprintf("R%d, #%d", immNum, decimalNum)
 		return formattedString + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) +
-			" CBNZ " + formattedRegisterString
+			" CBNZ " + formattedRegisterString + "\n"
 	}
 
 	if strings.Index(opcode, "11001011000") == 0 { //SUB instruction NATHAN
@@ -298,7 +299,7 @@ func CreateString(instructionCode string) string {
 	}
 
 	if strings.Index(opcode, "00000000000") == 0 { //NOP instruction
-
+		return fmt.Sprintf("%-38s%-4d%s\n", instructionCode, ProgramCounter, "NOP")
 	}
 
 	if strings.Index(opcode, "11101010000") == 0 { //EOR instruction NATHAN
@@ -316,11 +317,18 @@ func CreateString(instructionCode string) string {
 	}
 
 	if strings.Index(opcode, "11111110110") == 0 { //BREAK instruction.
+		hasBreak = true
 		return fmt.Sprintf("%-38s", "11111110 110 11110 11111 11111 100111") + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) +
 			" BREAK" + "\n"
 	}
 
-	return "\n"
+	if hasBreak {
+		constNum := ConvertBinaryToDecimal(instructionCode)
+		instFormat := fmt.Sprintf("%-38s", instructionCode)
+		return instFormat + fmt.Sprintf("%-4s", strconv.FormatInt(int64(ProgramCounter), 10)) + fmt.Sprintf("%d\n", constNum)
+	}
+
+	return fmt.Sprintf("%-38s%-4s INSTURCTION NOT FOUND\n", instructionCode, strconv.FormatInt(int64(ProgramCounter), 10))
 }
 
 // this takes a binary string, 2's complement or not (depending on the first bit) and converts it to decimal.
