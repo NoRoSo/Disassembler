@@ -73,7 +73,7 @@ func WriteOutput(fileLine []string) {
 }
 
 func CreateString(instructionCode string) string {
-	opcode := instructionCode[0:11] //the opcode of an instruction, will change depending on instruction
+	opcode := instructionCode[0:11] //the opcode of an instruction, it will change depending on instruction
 
 	if strings.Index(opcode, "000101") == 0 { //B instruction
 		opcode = instructionCode[0:6] //an example of opcode getting changed
