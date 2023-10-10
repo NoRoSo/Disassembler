@@ -360,7 +360,7 @@ func CreateString(instructionCode string) string {
 	}
 
 	if strings.Index(opcode, "00000000000") == 0 { //NOP instruction
-		return fmt.Sprintf("00000000 000 00000 00000 00000 00000\t%d\t%s\n", ProgramCounter, "NOP")
+		return fmt.Sprintf("0000000000000000000000000000000\t%d\t%s\n", ProgramCounter, "NOP")
 	}
 
 	if strings.Index(opcode, "11101010000") == 0 { //EOR instruction NATHAN
@@ -379,7 +379,7 @@ func CreateString(instructionCode string) string {
 
 	if strings.Index(opcode, "11111110110") == 0 { //BREAK instruction.
 		hasBreak = true
-		return fmt.Sprintf("%s\t", "11111110 110 11110 11111 11111 00111") + fmt.Sprintf("%s\t", strconv.FormatInt(int64(ProgramCounter), 10)) +
+		return fmt.Sprintf("%s\t", "1 11111 10110 11110 11111 11111 100111") + fmt.Sprintf("%s\t", strconv.FormatInt(int64(ProgramCounter), 10)) +
 			"BREAK" + "\n"
 	}
 
