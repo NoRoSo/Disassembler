@@ -109,6 +109,9 @@ func WriteOutput(fileLine []string) {
 		currentInstruction = instructionMap[int64(ProgramCounter)]
 	}
 
+	tempString2 := createSimString(currentInstruction)
+	_, errs = file2.WriteString(tempString2)
+
 	err := file.Close()
 	if err != nil {
 		return
@@ -138,21 +141,36 @@ func createSimString(instruction Instruction) string {
 		ProgramCounter += 4
 	case "SUB":
 		//SUB goes here
+		simOutput += fmt.Sprintf("SUB\tR%d, R%d, R%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.targetRegister3)
+		registers[instruction.storeRegister] = registers[instruction.targetRegister1] - registers[instruction.targetRegister3]
+		ProgramCounter += 4
 	case "SUBI":
 		//SUBI goes here
+		simOutput += fmt.Sprintf("SUBI\tR%d, R%d, #%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.immediateValue)
+		registers[instruction.storeRegister] = registers[instruction.targetRegister1] - instruction.immediateValue
+		ProgramCounter += 4
 	case "AND":
 		//AND goes here
+		simOutput += fmt.Sprintf("AND\tR%d, R%d, R%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.targetRegister3)
+		registers[instruction.storeRegister] = registers[instruction.targetRegister1] & registers[instruction.targetRegister3]
+		ProgramCounter += 4
 	case "ORR":
 		//ORR goes here
+		simOutput += fmt.Sprintf("ORR\tR%d, R%d, R%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.targetRegister3)
+		registers[instruction.storeRegister] = registers[instruction.targetRegister1] | registers[instruction.targetRegister3]
+		ProgramCounter += 4
 	case "EOR":
 		//EOR goes here
+		simOutput += fmt.Sprintf("EOR\tR%d, R%d, R%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.targetRegister3)
+		registers[instruction.storeRegister] = registers[instruction.targetRegister1] ^ registers[instruction.targetRegister3]
+		ProgramCounter += 4
 	case "B":
 		//B goes here
-		simOutput += fmt.Sprintf("B\t#%d", instruction.immediateValue)
+		simOutput += fmt.Sprintf("B\t#%d\n", instruction.immediateValue)
 		ProgramCounter += int(4 * instruction.immediateValue)
 	case "CBZ":
 		//CBZ goes here COMPLETE
-		simOutput += fmt.Sprintf("CBZ\tR%d, #%d", instruction.targetRegister1, instruction.immediateValue)
+		simOutput += fmt.Sprintf("CBZ\tR%d, #%d\n", instruction.targetRegister1, instruction.immediateValue)
 		if registers[instruction.targetRegister1] == 0 {
 			ProgramCounter += int(4 * instruction.immediateValue) //branch
 		} else {
@@ -160,7 +178,7 @@ func createSimString(instruction Instruction) string {
 		}
 	case "CBNZ":
 		//CBNZ goes here COMPLETE
-		simOutput += fmt.Sprintf("CBNZ\tR%d, #%d", instruction.targetRegister1, instruction.immediateValue)
+		simOutput += fmt.Sprintf("CBNZ\tR%d, #%d\n", instruction.targetRegister1, instruction.immediateValue)
 		if registers[instruction.targetRegister1] != 0 {
 			ProgramCounter += int(4 * instruction.immediateValue) //branch
 		} else {
@@ -168,12 +186,16 @@ func createSimString(instruction Instruction) string {
 		}
 	case "MOVZ":
 		//MOVZ goes here
+		ProgramCounter += 4
 	case "MOVK":
 		//MOVK goes here
+		ProgramCounter += 4
 	case "LSR":
 		//LSR goes here
+		ProgramCounter += 4
 	case "LSL":
 		//LSL goes here
+		ProgramCounter += 4
 	case "STUR":
 		//STUR goes here COMPLETE
 		simOutput += fmt.Sprintf("STUR\tR%d, [R%d, #%d]\n", instruction.storeRegister, instruction.targetRegister1, instruction.immediateValue)
@@ -186,6 +208,7 @@ func createSimString(instruction Instruction) string {
 		ProgramCounter += 4
 	case "ASR":
 		//ASR goes here
+		ProgramCounter += 4
 	case "NOP":
 		//NOP goes here COMPLETE
 		simOutput += "NOP\n"
@@ -487,7 +510,7 @@ func outputRegisters() string {
 		outputString += "\n"
 	}
 
-	return outputString
+	return outputString + "\n"
 }
 
 func outputData() string {
