@@ -16,7 +16,7 @@ var hasBreak = false
 var cycleNum = 1
 
 var instructionMap = map[int64]Instruction{}
-var registers = []int64{}
+var registers [1024]int64
 var maxRegisters = 32
 
 type Instruction struct {
@@ -51,6 +51,11 @@ func main() {
 		fileLines = append(fileLines, fileScanner.Text())
 	}
 
+	//initializing the registers to zeros
+	for i := 0; i < 1024; i++ {
+		registers[i] = 0
+	}
+
 	WriteOutput(fileLines)
 
 	err = readFile.Close()
@@ -62,8 +67,6 @@ func main() {
 func WriteOutput(fileLine []string) {
 	file, errs := os.Create(*OutputFileName + "_dis.txt")
 	file2, errs := os.Create(*OutputFileName + "_sim.txt")
-
-	fmt.Println(outputRegisters())
 
 	if errs != nil {
 		fmt.Println("Failed to create file:", errs)
@@ -88,10 +91,12 @@ func WriteOutput(fileLine []string) {
 
 	currentInstruction := instructionMap[int64(96)]
 	ProgramCounter = 96
-	for currentInstruction.instructionName != "BREAK" {
+	//for currentInstruction.instructionName != "BREAK" {
+	for ProgramCounter <= 100 {
 		tempString2 := createSimString(currentInstruction)
 		_, errs = file2.WriteString(tempString2)
 		cycleNum++
+		currentInstruction = instructionMap[int64(ProgramCounter)]
 	}
 
 	err := file.Close()
@@ -110,6 +115,59 @@ func createSimString(instruction Instruction) string {
 	simOutput := "=====================\n"
 	simOutput += fmt.Sprintf("cycle:%d\t%d\t", cycleNum, instruction.programCounter)
 
+	switch instruction.instructionName {
+	case "ADD":
+		//ADD code goes here COMPLETE
+		simOutput += fmt.Sprintf("ADD\tR%d,\tR%d,\tR%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.targetRegister3)
+		registers[instruction.storeRegister] = registers[instruction.targetRegister1] + registers[instruction.targetRegister3]
+		ProgramCounter += 4
+	case "ADDI":
+		//ADDI goes here COMPLETE
+		simOutput += fmt.Sprintf("ADDI\tR%d,\tR%d,\t#%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.immediateValue)
+		registers[instruction.storeRegister] = registers[instruction.targetRegister1] + instruction.immediateValue
+		ProgramCounter += 4
+	case "SUB":
+		//SUB goes here
+	case "SUBI":
+		//SUBI goes here
+	case "AND":
+		//AND goes here
+	case "ORR":
+		//ORR goes here
+	case "EOR":
+		//EOR goes here
+	case "B":
+		//B goes here
+
+	case "CBZ":
+		//CBZ goes here
+	case "CBNZ":
+		//CBNZ goes here
+	case "MOVZ":
+		//MOVZ goes here
+	case "MOVK":
+		//MOVK goes here
+	case "LSR":
+		//LSR goes here
+	case "LSL":
+		//LSL goes here
+	case "STUR":
+		//STUR goes here
+	case "LDUR":
+		//LDUR goes here
+	case "ASR":
+		//ASR goes here
+	case "NOP":
+		//NOP goes here COMPLETE
+		simOutput += "NOP\n"
+	case "BREAK":
+		//BREAK goes here COMPLETE
+		simOutput += "BREAK\n"
+	}
+
+	//required, to output registers and data after completing the actual processing of instructions
+	simOutput += outputRegisters()
+	simOutput += outputData()
 	return simOutput
 }
 
@@ -348,9 +406,10 @@ func ConvertBinaryToDecimal(binaryString string) int64 {
 	}
 }
 
-func resizeRegisterList() {
-	//TODO... resize register list to fit whatever the maximum register accessed is
-
+func resizeRegisterList(registerNum int) {
+	for registerNum > maxRegisters {
+		maxRegisters += 8
+	}
 }
 
 func outputRegisters() string {
@@ -364,6 +423,12 @@ func outputRegisters() string {
 		}
 		outputString += "\n"
 	}
+
+	return outputString
+}
+
+func outputData() string {
+	outputString := "data:\n"
 
 	return outputString
 }
