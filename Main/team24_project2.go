@@ -349,7 +349,7 @@ func ConvertBinaryToDecimal(binaryString string) int64 {
 }
 
 func resizeRegisterList() {
-	//TODO... resize register list to fit whatever the maximum register accessed is.
+	//TODO... resize register list to fit whatever the maximum register accessed is
 
 }
 
