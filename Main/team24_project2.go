@@ -19,6 +19,10 @@ var instructionMap = map[int64]Instruction{}
 var registers [1024]int64
 var maxRegisters = 32
 
+var dataList [1024]Data
+var currentDataLocation = 0
+var maxDataLocation = 8
+
 type Instruction struct {
 	instructionName string //The instruction name
 	storeRegister   int64  //The register where the output gets stored
@@ -26,6 +30,11 @@ type Instruction struct {
 	targetRegister3 int64  //The first target register (if you read it, it will be the middle register)
 	immediateValue  int64  //If needed on certain instructions, use this to store immediate values (e.g: B, ADDI, SUBI, etc.)
 	programCounter  int64  //The PC of this instruction.
+}
+
+type Data struct {
+	memLocation int64
+	value       int64
 }
 
 func main() {
@@ -54,6 +63,7 @@ func main() {
 	//initializing the registers to zeros
 	for i := 0; i < 1024; i++ {
 		registers[i] = 0
+		dataList[i] = Data{memLocation: -1, value: 0}
 	}
 
 	WriteOutput(fileLines)
@@ -91,8 +101,8 @@ func WriteOutput(fileLine []string) {
 
 	currentInstruction := instructionMap[int64(96)]
 	ProgramCounter = 96
-	//for currentInstruction.instructionName != "BREAK" {
-	for ProgramCounter <= 100 {
+	for currentInstruction.instructionName != "BREAK" {
+		//for ProgramCounter <= 108 {
 		tempString2 := createSimString(currentInstruction)
 		_, errs = file2.WriteString(tempString2)
 		cycleNum++
@@ -118,12 +128,12 @@ func createSimString(instruction Instruction) string {
 	switch instruction.instructionName {
 	case "ADD":
 		//ADD code goes here COMPLETE
-		simOutput += fmt.Sprintf("ADD\tR%d,\tR%d,\tR%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.targetRegister3)
+		simOutput += fmt.Sprintf("ADD\tR%d, R%d, R%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.targetRegister3)
 		registers[instruction.storeRegister] = registers[instruction.targetRegister1] + registers[instruction.targetRegister3]
 		ProgramCounter += 4
 	case "ADDI":
 		//ADDI goes here COMPLETE
-		simOutput += fmt.Sprintf("ADDI\tR%d,\tR%d,\t#%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.immediateValue)
+		simOutput += fmt.Sprintf("ADDI\tR%d, R%d, #%d\n", instruction.storeRegister, instruction.targetRegister1, instruction.immediateValue)
 		registers[instruction.storeRegister] = registers[instruction.targetRegister1] + instruction.immediateValue
 		ProgramCounter += 4
 	case "SUB":
@@ -138,11 +148,24 @@ func createSimString(instruction Instruction) string {
 		//EOR goes here
 	case "B":
 		//B goes here
-
+		simOutput += fmt.Sprintf("B\t#%d", instruction.immediateValue)
+		ProgramCounter += int(4 * instruction.immediateValue)
 	case "CBZ":
-		//CBZ goes here
+		//CBZ goes here COMPLETE
+		simOutput += fmt.Sprintf("CBZ\tR%d, #%d", instruction.targetRegister1, instruction.immediateValue)
+		if registers[instruction.targetRegister1] == 0 {
+			ProgramCounter += int(4 * instruction.immediateValue) //branch
+		} else {
+			ProgramCounter += 4 // no branch
+		}
 	case "CBNZ":
-		//CBNZ goes here
+		//CBNZ goes here COMPLETE
+		simOutput += fmt.Sprintf("CBNZ\tR%d, #%d", instruction.targetRegister1, instruction.immediateValue)
+		if registers[instruction.targetRegister1] != 0 {
+			ProgramCounter += int(4 * instruction.immediateValue) //branch
+		} else {
+			ProgramCounter += 4 // no branch
+		}
 	case "MOVZ":
 		//MOVZ goes here
 	case "MOVK":
@@ -152,14 +175,21 @@ func createSimString(instruction Instruction) string {
 	case "LSL":
 		//LSL goes here
 	case "STUR":
-		//STUR goes here
+		//STUR goes here COMPLETE
+		simOutput += fmt.Sprintf("STUR\tR%d, [R%d, #%d]\n", instruction.storeRegister, instruction.targetRegister1, instruction.immediateValue)
+		addData(registers[instruction.targetRegister1]+(4*instruction.immediateValue), registers[instruction.storeRegister])
+		ProgramCounter += 4
 	case "LDUR":
-		//LDUR goes here
+		//LDUR goes here COMPLETE
+		simOutput += fmt.Sprintf("LDUR\tR%d, [R%d, #%d]\n", instruction.storeRegister, instruction.targetRegister1, instruction.immediateValue)
+		registers[instruction.storeRegister] = getData(registers[instruction.targetRegister1] + (4 * instruction.immediateValue))
+		ProgramCounter += 4
 	case "ASR":
 		//ASR goes here
 	case "NOP":
 		//NOP goes here COMPLETE
 		simOutput += "NOP\n"
+		ProgramCounter += 4
 	case "BREAK":
 		//BREAK goes here COMPLETE
 		simOutput += "BREAK\n"
@@ -406,9 +436,42 @@ func ConvertBinaryToDecimal(binaryString string) int64 {
 	}
 }
 
-func resizeRegisterList(registerNum int) {
-	for registerNum > maxRegisters {
-		maxRegisters += 8
+func addData(memLocation int64, value int64) {
+	hasData, index := hasData(memLocation)
+
+	if hasData {
+		dataList[index].value = value
+		return
+	}
+
+	dataList[currentDataLocation] = Data{memLocation: memLocation, value: value}
+	currentDataLocation++
+	fixData()
+}
+
+func getData(memLocation int64) int64 {
+	for i := 0; i < currentDataLocation; i++ {
+		if dataList[i].memLocation == memLocation {
+			return dataList[i].value
+		}
+	}
+
+	return -1
+}
+
+func hasData(memLocation int64) (bool, int) { //bool being if the mem Location is in use, int being the index
+	for i := 0; i < currentDataLocation; i++ {
+		if dataList[i].memLocation == memLocation {
+			return true, i
+		}
+	}
+
+	return false, -1
+}
+
+func fixData() {
+	if currentDataLocation > maxDataLocation {
+		maxDataLocation += 8
 	}
 }
 
@@ -429,6 +492,26 @@ func outputRegisters() string {
 
 func outputData() string {
 	outputString := "data:\n"
+
+	starterNum := 8
+	for ; starterNum <= maxDataLocation; starterNum += 8 {
+		for i := starterNum - 8; i < starterNum; i++ {
+			if i == starterNum-1 {
+				if dataList[i].memLocation == -1 {
+					outputString += "0"
+				} else {
+					outputString += fmt.Sprintf("%d:%d", dataList[i].memLocation, dataList[i].value)
+				}
+			} else {
+				if dataList[i].memLocation == -1 {
+					outputString += "0\t"
+				} else {
+					outputString += fmt.Sprintf("%d:%d\t", dataList[i].memLocation, dataList[i].value)
+				}
+			}
+		}
+		outputString += "\n"
+	}
 
 	return outputString
 }
